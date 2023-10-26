@@ -18,7 +18,6 @@ namespace Kiwisuit2.Data
         }
 
         public IMongoCollection<Product> Products => _database.GetCollection<Product>("Products");
-        public IMongoCollection<Users> Users => _database.GetCollection<Users>("Users");
 
     }
 }
