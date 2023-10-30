@@ -13,11 +13,11 @@ namespace Kiwisuit2.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class WeatherForecastController : ControllerBase
+    public class ProductController : ControllerBase
     {
         private readonly IProductService _productRepository;
 
-        public WeatherForecastController(IProductService productRepository)
+        public ProductController(IProductService productRepository)
         {
             _productRepository = productRepository;
         }

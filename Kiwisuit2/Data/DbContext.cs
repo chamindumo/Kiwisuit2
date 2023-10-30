@@ -7,11 +7,11 @@ namespace Kiwisuit2.Data
     {
         private readonly IMongoDatabase _database;
 
-        public DbContext()
+        public DbContext(IConfiguration configuration)
         {
             // Set your connection string and database name here
-            string connectionString = "mongodb://localhost:27017";
-            string databaseName = "myDb";
+            string connectionString = configuration.GetConnectionString("MongoDB");
+            string databaseName = configuration.GetConnectionString("DatabaseName");
 
             var client = new MongoClient(connectionString);
             _database = client.GetDatabase(databaseName);

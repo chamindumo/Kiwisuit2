@@ -15,7 +15,7 @@ namespace Kiwisuit2.Repository
             Task<Product> GetProductByIdAsync(string id);
             Task CreateProductAsync(Product product);
             Task UpdateProductAsync(string id, Product updatedProduct);
-            Task DeleteProductAsync(string id);
+            Task DeleteProductAsync(string productId);
         }
     
 
