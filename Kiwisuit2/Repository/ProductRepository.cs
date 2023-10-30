@@ -15,41 +15,34 @@ namespace Kiwisuit2.Repository
             _dbContext = dbContext;
         }
 
-        public async Task<IEnumerable<Product>> GetAllProductsAsync()
+       public async Task<IEnumerable<Product>> GetAllProductsAsync()
         {
             return await _dbContext.Products.Find(_ => true).ToListAsync();
         }
 
         public async Task<Product> GetProductByIdAsync(string productId)
         {
-            if (!IsValidObjectIdFormat(productId))
-            {
-                // Handle invalid format, for example, return a 400 Bad Request response.
-                return null;
-            }
-
             var filter = Builders<Product>.Filter.Eq(p => p.ProductId, productId);
             return await _dbContext.Products.Find(filter).FirstOrDefaultAsync();
         }
-
 
         public async Task CreateProductAsync(Product product)
         {
             await _dbContext.Products.InsertOneAsync(product);
         }
 
-        public async Task UpdateProductAsync(string productId, Product updatedProduct)
+        public async Task UpdateProductAsync(string id, Product updatedProduct)
         {
-            var filter = Builders<Product>.Filter.Eq(p => p.ProductId, productId);
-            var update = Builders<Product>.Update
-                .Set(p => p.Name, updatedProduct.Name)
-                .Set(p => p.Price, updatedProduct.Price)
-                .Set(p => p.Description, updatedProduct.Description)
-                .Set(p => p.IsAvalable, updatedProduct.IsAvalable)
-                .Set(p => p.ExpirDate, updatedProduct.ExpirDate)
-                .Set(p => p.ImageData, updatedProduct.ImageData);
+            if (!ObjectId.TryParse(id, out ObjectId objectId))
+            {
+                return; // Do nothing for an invalid ID
+            }
 
-            await _dbContext.Products.UpdateOneAsync(filter, update);
+            // Remove the _id field from the updatedProduct
+            updatedProduct.Id = objectId;
+
+            var filter = Builders<Product>.Filter.Eq(p => p.Id, objectId);
+            await _dbContext.Products.ReplaceOneAsync(filter, updatedProduct);
         }
 
         public async Task DeleteProductAsync(string productId)
@@ -57,17 +50,5 @@ namespace Kiwisuit2.Repository
             var filter = Builders<Product>.Filter.Eq(p => p.ProductId, productId);
             await _dbContext.Products.DeleteOneAsync(filter);
         }
-
-
-        private bool IsValidObjectIdFormat(string input)
-        {
-            if (string.IsNullOrEmpty(input) || input.Length != 24)
-            {
-                return false;
-            }
-
-            return System.Text.RegularExpressions.Regex.IsMatch(input, "^[0-9a-fA-F]+$");
-        }
-
     }
 }
