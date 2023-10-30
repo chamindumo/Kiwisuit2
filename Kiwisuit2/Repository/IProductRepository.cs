@@ -14,9 +14,9 @@ namespace Kiwisuit2.Repository
             Task<IEnumerable<Product>> GetAllProductsAsync();
             Task<Product> GetProductByIdAsync(string id);
             Task CreateProductAsync(Product product);
-            Task UpdateProductAsync(string id, Product updatedProduct);
-            Task DeleteProductAsync(string productId);
-        }
+            Task<bool> UpdateProductAsync(string id, Product updatedUser);
+            Task<bool> DeleteProductAsync(string productId);
+    }
     
 
 }

@@ -3,6 +3,7 @@ using Kiwisuit2.DTO;
 using Kiwisuit2.Models;
 using Kiwisuit2.Repository;
 using Kiwisuit2.Service;
+using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -30,9 +31,9 @@ namespace Kiwisuit2.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> Get(string id)
+        public async Task<IActionResult> Get(string productId)
         {
-            var product = await _productRepository.GetByIdAsync(id);
+            var product = await _productRepository.GetByIdAsync(productId);
             if (product == null)
             {
                 return NotFound(); // Return 404 if the product is not found
@@ -41,77 +42,27 @@ namespace Kiwisuit2.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateProduct([FromBody] ProductDTO product)
+        public async Task<IActionResult> CreateProduct( ProductDTO product)
         {
-            if (product == null)
-            {
-                return BadRequest("Invalid product data.");
-            }
+            
+           await _productRepository.CreateAsync(product);
+            return Ok(product);
 
-            try
-            {
-                await _productRepository.CreateAsync(product);
-                return CreatedAtAction("Get", new { id = product.Id }, product);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal Server Error: {ex.Message}");
-            }
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateProduct(string id, [FromBody] ProductDTO updatedProduct)
         {
-            if (!ObjectId.TryParse(id, out ObjectId objectId))
-            {
-                return BadRequest("Invalid ObjectId format.");
-            }
-
-            if (updatedProduct == null)
-            {
-                return BadRequest("Invalid product data.");
-            }
-
-            var product = await _productRepository.GetByIdAsync(id);
-            if (product == null)
-            {
-                return NotFound(); // Return 404 if the product is not found
-            }
-
-            try
-            {
-                await _productRepository.UpdateAsync(id, updatedProduct);
-                return Ok(updatedProduct);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal Server Error: {ex.Message}");
-            }
+            await _productRepository.UpdateAsync(id, updatedProduct);
+            return Ok(updatedProduct);
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteProduct(string id)
+        public async Task<ActionResult<string>> DeleteProduct(string id)
         {
-            if (!ObjectId.TryParse(id, out ObjectId objectId))
-            {
-                return BadRequest("Invalid ObjectId format.");
-            }
+            await _productRepository.DeleteAsync(id);
+            return Ok(id);
 
-            var product = await _productRepository.GetByIdAsync(id);
-            if (product == null)
-            {
-                return NotFound(); // Return 404 if the product is not found
-            }
-
-            try
-            {
-                await _productRepository.DeleteAsync(id);
-                return NoContent(); // Return 204 (No Content) on successful deletion
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal Server Error: {ex.Message}");
-            }
         }
     }
 }
