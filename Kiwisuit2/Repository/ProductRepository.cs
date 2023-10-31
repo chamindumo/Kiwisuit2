@@ -24,7 +24,7 @@ namespace Kiwisuit2.Repository
 
         public async Task<Product> GetProductByIdAsync(string id)
         {
-            return await _dbContext.Products.Find(p => p.ProductId == productId).FirstOrDefaultAsync();
+            return await _dbContext.Products.Find(p => p.ProductId == id).FirstOrDefaultAsync();
         }
 
         public async Task CreateProductAsync(Product product)
@@ -59,14 +59,15 @@ namespace Kiwisuit2.Repository
 
         public async Task<bool> DeleteProductAsync(string productId)
         {
-            var user = await _dbContext.Products.Find(p => p.ProductId == productId).FirstOrDefaultAsync();
+            var filter = Builders<Product>.Filter.Eq(p => p.ProductId, productId);
+            var deleteResult = await _dbContext.Products.DeleteOneAsync(filter);
 
-            if (user != null)
+            if (deleteResult.DeletedCount > 0)
             {
-                return true; // User was successfully deleted
+                return true; // Product was successfully deleted
             }
 
-            return false; // User with the given username was not found
+            return false; // Product with the given productId was not found
         }
     }
 }
