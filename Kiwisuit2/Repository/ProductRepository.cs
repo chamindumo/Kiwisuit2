@@ -15,21 +15,27 @@ namespace Kiwisuit2.Repository
             _dbContext = dbContext;
         }
 
-       public async Task<IEnumerable<Product>> GetAllProductsAsync()
+        public async Task<IEnumerable<Product>> GetAllProductsAsync()
         {
             return await _dbContext.Products.Find(_ => true).ToListAsync();
         }
 
-        public async Task<Product> GetProductByIdAsync(string productId)
+        public async Task<Product> GetProductByIdAsync(string id)
         {
-            var filter = Builders<Product>.Filter.Eq(p => p.ProductId, productId);
-            return await _dbContext.Products.Find(filter).FirstOrDefaultAsync();
+            if (!ObjectId.TryParse(id, out ObjectId objectId))
+            {
+                return null; // Return null for an invalid ID
+            }
+
+            return await _dbContext.Products.Find(p => p.Id == objectId).FirstOrDefaultAsync();
         }
 
         public async Task CreateProductAsync(Product product)
         {
             await _dbContext.Products.InsertOneAsync(product);
         }
+
+
 
         public async Task UpdateProductAsync(string id, Product updatedProduct)
         {
@@ -45,10 +51,14 @@ namespace Kiwisuit2.Repository
             await _dbContext.Products.ReplaceOneAsync(filter, updatedProduct);
         }
 
-        public async Task DeleteProductAsync(string productId)
+        public async Task DeleteProductAsync(string id)
         {
-            var filter = Builders<Product>.Filter.Eq(p => p.ProductId, productId);
-            await _dbContext.Products.DeleteOneAsync(filter);
+            if (!ObjectId.TryParse(id, out ObjectId objectId))
+            {
+                return; // Do nothing for an invalid ID
+            }
+
+            await _dbContext.Products.DeleteOneAsync(p => p.Id == objectId);
         }
     }
 }

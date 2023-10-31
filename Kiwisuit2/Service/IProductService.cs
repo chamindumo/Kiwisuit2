@@ -1,4 +1,5 @@
 ﻿using Kiwisuit2.DTO;
+using Kiwisuit2.Models;
 
 namespace Kiwisuit2.Service
 {
@@ -9,5 +10,6 @@ namespace Kiwisuit2.Service
         Task CreateAsync(ProductDTO productDTO);
         Task UpdateAsync(string id, ProductDTO productDTO);
         Task DeleteAsync(string id);
+
     }
 }

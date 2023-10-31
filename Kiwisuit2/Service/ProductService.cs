@@ -44,6 +44,8 @@ namespace Kiwisuit2.Service
         {
             await _productRepository.DeleteProductAsync(id);
         }
+
+       
     }
 }
 
