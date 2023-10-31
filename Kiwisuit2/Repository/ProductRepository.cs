@@ -1,8 +1,10 @@
 ﻿using Kiwisuit2.Data;
 using Kiwisuit2.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using MongoDB.Bson;
 using MongoDB.Driver;
+using DbContext = Kiwisuit2.Data.DbContext;
 
 namespace Kiwisuit2.Repository
 {
@@ -22,12 +24,7 @@ namespace Kiwisuit2.Repository
 
         public async Task<Product> GetProductByIdAsync(string id)
         {
-            if (!ObjectId.TryParse(id, out ObjectId objectId))
-            {
-                return null; // Return null for an invalid ID
-            }
-
-            return await _dbContext.Products.Find(p => p.Id == objectId).FirstOrDefaultAsync();
+            return await _dbContext.Products.Find(p => p.ProductId == productId).FirstOrDefaultAsync();
         }
 
         public async Task CreateProductAsync(Product product)
@@ -35,30 +32,41 @@ namespace Kiwisuit2.Repository
             await _dbContext.Products.InsertOneAsync(product);
         }
 
-
-
-        public async Task UpdateProductAsync(string id, Product updatedProduct)
+        public async Task<bool> UpdateProductAsync(string id, Product updatedUser)
         {
-            if (!ObjectId.TryParse(id, out ObjectId objectId))
+            var filter = Builders<Product>.Filter.Eq(u => u.ProductId, id);
+            var update = Builders<Product>.Update
+                .Set(u => u.ProductId, updatedUser.ProductId)
+                .Set(u => u.ExpirDate, updatedUser.ExpirDate)
+                .Set(u => u.Name, updatedUser.Name)
+                .Set(u => u.Price, updatedUser.Price)
+                .Set(u => u.IsAvalable, updatedUser.IsAvalable)
+
+                .Set(u => u.ExpirDate, updatedUser.ExpirDate)
+                .Set(u => u.ImageData, updatedUser.ImageData)
+
+                .Set(u => u.Description, updatedUser.Description);
+
+            var updateResult = await _dbContext.Products.UpdateOneAsync(filter, update);
+
+            if (updateResult.ModifiedCount > 0)
             {
-                return; // Do nothing for an invalid ID
+                return true; // User was successfully updated
             }
 
-            // Remove the _id field from the updatedProduct
-            updatedProduct.Id = objectId;
-
-            var filter = Builders<Product>.Filter.Eq(p => p.Id, objectId);
-            await _dbContext.Products.ReplaceOneAsync(filter, updatedProduct);
+            return false; // User with the given username was not fou
         }
 
-        public async Task DeleteProductAsync(string id)
+        public async Task<bool> DeleteProductAsync(string productId)
         {
-            if (!ObjectId.TryParse(id, out ObjectId objectId))
+            var user = await _dbContext.Products.Find(p => p.ProductId == productId).FirstOrDefaultAsync();
+
+            if (user != null)
             {
-                return; // Do nothing for an invalid ID
+                return true; // User was successfully deleted
             }
 
-            await _dbContext.Products.DeleteOneAsync(p => p.Id == objectId);
+            return false; // User with the given username was not found
         }
     }
 }
