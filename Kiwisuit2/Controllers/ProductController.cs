@@ -124,7 +124,7 @@ namespace Kiwisuit2.Controllers
         }
 
         [HttpGet("Google")]
-        public async Task<IActionResult> GetCoffeeShopsBetweenLocations(string location1, string location2)
+        public async Task<IActionResult> GetCoffeeShopsBetweenLocations(string location1, string location2,string Choice)
         {
             try
             {
@@ -132,7 +132,7 @@ namespace Kiwisuit2.Controllers
                 var client = _httpClientFactory.CreateClient();
 
                 // Make a request to the Google Places API to get coffee shops between the locations
-                var url = $"https://maps.googleapis.com/maps/api/place/textsearch/json?query=atm+between+{location1}+and+{location2}&key={apiKey}";
+                var url = $"https://maps.googleapis.com/maps/api/place/textsearch/json?query={Choice}+ between+{location1}+and+{location2}&key={apiKey}";
 
                 var response = await client.GetStringAsync(url);
 
