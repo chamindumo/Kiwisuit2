@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MongoDB.Bson;
 using MongoDB.Driver;
+using Newtonsoft.Json;
+using System.Net.Http;
 using DbContext = Kiwisuit2.Data.DbContext;
 
 namespace Kiwisuit2.Repository
@@ -11,10 +13,12 @@ namespace Kiwisuit2.Repository
     public class ProductRepository : IProductRepository
     {
         private readonly DbContext _dbContext;
+        private readonly HttpClient _httpClient;
 
-        public ProductRepository(DbContext dbContext)
+        public ProductRepository(DbContext dbContext, HttpClient httpClient)
         {
             _dbContext = dbContext;
+            _httpClient = httpClient;
         }
 
         public async Task<IEnumerable<Product>> GetAllProductsAsync()
@@ -69,5 +73,75 @@ namespace Kiwisuit2.Repository
 
             return false; // Product with the given productId was not found
         }
+
+        public async Task<bool> PostToFacebookAsync(string content, string type)
+        {
+            var accessToken = "EAAODFjzI1MQBOwT6KlW87yHxuyES3VpoetQw4VTxObAORH9bZC6RxOnSJzXcKrPDqweOkwRahxJne6Nv4lSkvWcEU5Isqs8lW67ZC6ZC5TT3gu06mVcJcO2IZC0bABQOLvsaQpbhCOhZBCniEDSAK4XVV5ZCjUES6AdRluUCXf8ylrmLxXFaYpmFZAf997l1s7lUZATgAJEZD";
+            var postParameters = new Dictionary<string, string>
+    {
+        { "access_token", accessToken }
+    };
+
+            if (type == "message")
+            {
+                postParameters["message"] = content;
+            }
+            else if (type == "link")
+            {
+                postParameters["link"] = content;
+            }
+            else
+            {
+                // Handle unsupported post type or provide a default action
+            }
+
+            using (var httpClient = new HttpClient())
+            {
+                var requestUri = "https://graph.facebook.com/v18.0/me/feed";
+                var postContent = new FormUrlEncodedContent(postParameters);
+
+                var response = await httpClient.PostAsync(requestUri, postContent);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    return true; // Post was successfully created on Facebook
+                }
+            }
+
+            return false; // Posting to Facebook failed
+        }
+
+
+        public async Task<bool> PostLinkAndMessageToFacebookAsync(string message,string link)
+        {
+            var accessToken = "EAAODFjzI1MQBOwT6KlW87yHxuyES3VpoetQw4VTxObAORH9bZC6RxOnSJzXcKrPDqweOkwRahxJne6Nv4lSkvWcEU5Isqs8lW67ZC6ZC5TT3gu06mVcJcO2IZC0bABQOLvsaQpbhCOhZBCniEDSAK4XVV5ZCjUES6AdRluUCXf8ylrmLxXFaYpmFZAf997l1s7lUZATgAJEZD";
+            var postParameters = new Dictionary<string, string>
+                    {
+                        { "message", message },
+                         { "link", link }
+
+                    };
+ 
+            using (var httpClient = new HttpClient())
+            {
+                var requestUri = $"https://graph.facebook.com/v18.0/me/feed?access_token={accessToken}";
+                var content = new FormUrlEncodedContent(postParameters);
+
+                var response = await httpClient.PostAsync(requestUri, content);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    return true; // Post was successfully created on Facebook
+                }
+            }
+
+            return false; // Posting to Facebook failed
+        }
+
+
+
+
     }
+
+
 }

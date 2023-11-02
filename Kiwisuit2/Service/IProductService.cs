@@ -10,6 +10,10 @@ namespace Kiwisuit2.Service
         Task CreateAsync(ProductDTO productDTO);
         Task UpdateAsync(string id, ProductDTO productDTO);
         Task DeleteAsync(string id);
+        Task<bool> PostToFacebookAsync( string message, string type);
+        Task<bool> PostLinkAndMessageToFacebookAsync(string message, string link);
+
+
 
     }
 }

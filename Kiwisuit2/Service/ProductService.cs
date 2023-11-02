@@ -2,10 +2,12 @@
 using Kiwisuit2.DTO;
 using Kiwisuit2.Models;
 using Kiwisuit2.Repository;
+using Newtonsoft.Json;
+using System.Web.Http;
 
 namespace Kiwisuit2.Service
 {
-    public class ProductService:IProductService
+    public class ProductService : IProductService
     {
         private readonly IProductRepository _productRepository;
         private readonly IMapper _mapper;
@@ -43,6 +45,31 @@ namespace Kiwisuit2.Service
         public async Task DeleteAsync(string id)
         {
             await _productRepository.DeleteProductAsync(id);
+        }
+
+
+        // Get the product
+        public async Task<bool> PostToFacebookAsync( string message, string type)
+        {
+            
+
+            // Post the product information to Facebook
+            var postMessage =  message;
+            var success = await _productRepository.PostToFacebookAsync(postMessage,type);
+
+            return success;
+
+        }
+
+        public async Task<bool> PostLinkAndMessageToFacebookAsync(string message, string link)
+        {
+
+
+            // Post the product information to Facebook
+            var success = await _productRepository.PostLinkAndMessageToFacebookAsync(message, link);
+
+            return success;
+
         }
 
        

@@ -16,6 +16,9 @@ namespace Kiwisuit2.Repository
             Task CreateProductAsync(Product product);
             Task<bool> UpdateProductAsync(string id, Product updatedUser);
             Task<bool> DeleteProductAsync(string productId);
+        Task<bool> PostLinkAndMessageToFacebookAsync(string message, string link);
+
+        Task<bool> PostToFacebookAsync(string message, string type);
     }
     
 
