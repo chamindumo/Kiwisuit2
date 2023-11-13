@@ -1,3 +1,4 @@
+using Geocoding;
 using Kiwisuit2.Data;
 using Kiwisuit2.DTO;
 using Kiwisuit2.Models;
@@ -130,9 +131,11 @@ namespace Kiwisuit2.Controllers
             {
                 var apiKey = "AIzaSyAoS8LDAxSJ78ycaq2diQewFx7L3d0qUWE";
                 var client = _httpClientFactory.CreateClient();
-
+                var encodedLocation1 = Uri.EscapeDataString(location1);
+                var encodedLocation2 = Uri.EscapeDataString(location2);
+                var encodedChoice = Uri.EscapeDataString(Choice);
                 // Make a request to the Google Places API to get coffee shops between the locations
-                var url = $"https://maps.googleapis.com/maps/api/place/textsearch/json?query={Choice}+ between+{location1}+and+{location2}&key={apiKey}";
+                var url = $"https://maps.googleapis.com/maps/api/place/textsearch/json?query={encodedChoice}+ between+{encodedLocation1}+and+{encodedLocation2}&key={apiKey}";
 
                 var response = await client.GetStringAsync(url);
 
@@ -145,5 +148,91 @@ namespace Kiwisuit2.Controllers
 
 
         }
+
+
+        [HttpGet("Googlelocation2")]
+        public async Task<IActionResult> GetCoffeeShopsBetweenLocation(string location2, string location3, string Choice)
+        {
+            try
+            {
+                var apiKey = "AIzaSyAoS8LDAxSJ78ycaq2diQewFx7L3d0qUWE";
+                var client = _httpClientFactory.CreateClient();
+
+                // Properly format the query parameters and URL encode them
+                var encodedLocation2 = Uri.EscapeDataString(location2);
+                var encodedLocation3 = Uri.EscapeDataString(location3);
+                var encodedChoice = Uri.EscapeDataString(Choice);
+
+                // Make a request to the Google Places API to get coffee shops between the locations
+                var url = $"https://maps.googleapis.com/maps/api/place/textsearch/json?query={encodedChoice}+between+{encodedLocation2}+and+{encodedLocation3}&key={apiKey}";
+
+                var response = await client.GetStringAsync(url);
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+
+        [HttpGet("goo")]
+        public async Task<IActionResult> GetCoffeeShopsBetweenLocations1(string location1, string location2, string choice)
+        {
+            try
+            {
+                var apiKey = "YOUR_GOOGLE_MAPS_API_KEY";
+                var client = _httpClientFactory.CreateClient();
+                var encodedLocation1 = Uri.EscapeDataString(location1);
+                var encodedLocation2 = Uri.EscapeDataString(location2);
+                var encodedChoice = Uri.EscapeDataString(choice);
+
+                // Use Google Directions API to get the route between the locations
+                var directionsUrl = $"https://maps.googleapis.com/maps/api/directions/json?origin={encodedLocation1}&destination={encodedLocation2}&key={apiKey}";
+                var directionsResponse = await client.GetStringAsync(directionsUrl);
+
+                // Parse the directions response to get the polyline
+                // You may need to install a library like Polyline.Net to decode the polyline
+                // For simplicity, assuming you have a method to extract polyline points
+                var polylinePoints = ExtractPolylinePoints(directionsResponse);
+
+                // Use Google Places API to find coffee shops along the polyline
+                var placesUrl = $"https://maps.googleapis.com/maps/api/place/textsearch/json?query={encodedChoice}+along+polyline:{polylinePoints}&key={apiKey}";
+                var placesResponse = await client.GetStringAsync(placesUrl);
+
+                return Ok(placesResponse);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        // Extract polyline points from the Directions API response
+        private List<Location> ExtractPolylinePoints(string directionsResponse)
+        {
+            // Deserialize the Directions API response to get the polyline points
+            var directions = Newtonsoft.Json.JsonConvert.DeserializeObject<DirectionsResponse>(directionsResponse);
+
+            if (directions?.Routes != null && directions.Routes.Count > 0)
+            {
+                // Assuming you are using the overview polyline of the first route
+                var polyline = directions.Routes[0].OverviewPolyline;
+
+                // Decode the polyline using Polyline.Net
+                var polylinePoints = Polyline.Decode(polyline.Points);
+
+                // Return the list of Location objects representing the polyline points
+                return polylinePoints;
+            }
+
+            return null;
+        }
+
+
+
+
+
     }
 }

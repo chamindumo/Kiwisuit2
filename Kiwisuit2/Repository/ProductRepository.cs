@@ -118,13 +118,13 @@ namespace Kiwisuit2.Repository
             var postParameters = new Dictionary<string, string>
                     {
                         { "message", message },
-                         { "link", link }
+                         { "url", link }
 
                     };
  
             using (var httpClient = new HttpClient())
             {
-                var requestUri = $"https://graph.facebook.com/v18.0/me/feed?access_token={accessToken}";
+                var requestUri = $"https://graph.facebook.com/v18.0/me/photos?access_token={accessToken}";
                 var content = new FormUrlEncodedContent(postParameters);
 
                 var response = await httpClient.PostAsync(requestUri, content);
